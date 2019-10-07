@@ -1,5 +1,6 @@
-const express = require("express");
+const db = require("./db");
 const hb = require("express-handlebars");
+const express = require("express");
 const app = express();
 
 app.use(express.static(__dirname + "/public"));
