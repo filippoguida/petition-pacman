@@ -5,5 +5,5 @@ CREATE TABLE signatures (
     first_name  VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    signature VARCHAR(255) NOT NULL
+    signature TEXT NOT NULL
 );

@@ -1,17 +1,24 @@
 const db = require("./db");
+const bp = require("body-parser");
 const hb = require("express-handlebars");
 const express = require("express");
 const app = express();
 
-app.use(express.static(__dirname + "/public"));
-
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
 
-app.get("/", (req, res) => {
+app.use(express.static(__dirname + "/public"));
+app.use(bp.urlencoded({ extended: false }));
+app.use(bp.json());
+
+app.get("/petition", (req, res) => {
     res.render("index", {
         layout: "main"
     });
+});
+
+app.post("/petition", (req, res) => {
+    res.send(db.addSignature(req.body).catch(e => console.log(e)));
 });
 
 app.listen(8080, () => {
