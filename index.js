@@ -27,6 +27,17 @@ app.get("/thanks", (req, res) => {
     });
 });
 
+app.get("/signers", (req, res) => {
+    db.getSignatures()
+        .then(signersTable => {
+            res.render("signers", {
+                layout: "main",
+                signers: signersTable.rows
+            });
+        })
+        .catch(e => console.log(e));
+});
+
 app.listen(8080, () => {
     console.log("Server is listening on port 8080");
 });

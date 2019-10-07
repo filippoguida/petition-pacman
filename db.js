@@ -11,5 +11,5 @@ module.exports.addSignature = newEntry => {
 };
 
 module.exports.getSignatures = () => {
-    return db.query(`SELECT * FROM signatures`);
+    return db.query(`SELECT first_name, last_name FROM signatures`);
 };
