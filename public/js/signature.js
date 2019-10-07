@@ -15,6 +15,16 @@ new window.p5(p5 => {
     };
 }, sigDiv);
 
-$(document).click(() => {
-    console.log($(".p5Canvas")[0].toDataURL());
+$("#signature-form").submit(e => {
+    e.preventDefault();
+    $.ajax({
+        method: "POST",
+        url: "/petition",
+        data: {
+            first_name: $('input[name="fname"]').val(),
+            last_name: $('input[name="lname"]').val(),
+            email: $('input[name="email"]').val(),
+            signature: $(".p5Canvas")[0].toDataURL("png")
+        }
+    });
 });
