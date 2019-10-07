@@ -21,6 +21,12 @@ app.post("/petition", (req, res) => {
     res.send(db.addSignature(req.body).catch(e => console.log(e)));
 });
 
+app.get("/thanks", (req, res) => {
+    res.render("thanks", {
+        layout: "main"
+    });
+});
+
 app.listen(8080, () => {
     console.log("Server is listening on port 8080");
 });
