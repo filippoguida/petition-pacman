@@ -26,15 +26,49 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get("/login", (req, res) => {
+    if (!req.session.regId) res.render("login");
+    else res.redirect("/petition");
+});
+
+app.post("/login", (req, res) => {
+    db.getUserToken(req.body, {
+        success: id => {
+            req.session.regId = id;
+            res.redirect("/petition");
+        },
+        error: err => {
+            console.log(err);
+            res.render("login", { error: true });
+        }
+    });
+});
+
+app.get("/registration", (req, res) => {
+    if (!req.session.regId) res.render("registration");
+    else res.redirect("/petition");
+});
+
+app.post("/registration", (req, res) => {
+    db.addUser(req.body, {
+        success: id => {
+            req.session.regId = id;
+            res.redirect("/petition");
+        },
+        error: () => res.render("registration", { error: true })
+    });
+});
+
 app.get("/petition", (req, res) => {
-    if (!req.session.id) res.render("petition");
+    if (!req.session.regId) res.redirect("/registration");
+    else if (!req.session.sigId) res.render("petition");
     else res.redirect("/thanks");
 });
 
 app.post("/petition", (req, res) => {
     db.addSignature(req.body, {
         success: id => {
-            req.session.id = id;
+            req.session.sigId = id;
             res.redirect("/thanks");
         },
         error: () => res.render("petition", { error: true })
@@ -42,15 +76,17 @@ app.post("/petition", (req, res) => {
 });
 
 app.get("/thanks", (req, res) => {
-    if (!req.session.id) res.redirect("/petition");
+    if (!req.session.regId) res.redirect("/registration");
+    else if (!req.session.sigId) res.redirect("/petition");
     else
-        db.getSignature(req.session.id, {
+        db.getSignature(req.session.sigId, {
             success: signature => res.render("thanks", { signature })
         });
 });
 
 app.get("/signers", (req, res) => {
-    if (!req.session.id) res.redirect("/petition");
+    if (!req.session.regId) res.redirect("/registration");
+    else if (!req.session.sigId) res.redirect("/petition");
     else
         db.getSigners({
             success: signers => res.render("signers", { signers }),
