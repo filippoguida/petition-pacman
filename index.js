@@ -26,70 +26,69 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/login", (req, res) => {
-    if (!req.session.id) res.render("login");
-    else res.redirect("/petition");
-});
-
 app.get("/registration", (req, res) => {
-    if (!req.session.id) res.render("registration");
-    else res.redirect("/petition");
-});
-
-app.post("/login", (req, res) => {
-    db.getUserToken(req.body, {
-        success: id => {
-            req.session.id = id;
-            res.redirect("/petition");
-        },
-        error: () => res.render("login", { error: true })
-    });
+    if (req.session.id) res.redirect("/petition");
+    else res.render("registration");
 });
 
 app.post("/registration", (req, res) => {
-    db.addUser(req.body, {
-        success: id => {
+    db.addUser(req.body)
+        .then(id => {
             req.session.id = id;
             res.redirect("/petition");
-        },
-        error: () => res.render("registration", { error: true })
-    });
+        })
+        .catch(err => console.log(err)); // res.render("registration", { error: true }));
+});
+
+app.get("/login", (req, res) => {
+    if (req.session.id) res.redirect("/petition");
+    else res.render("login");
+});
+
+app.post("/login", (req, res) => {
+    db.getUserToken(req.body)
+        .then(id => {
+            req.session.id = id;
+            res.redirect("/petition");
+        })
+        .catch(() => res.render("login", { error: true }));
 });
 
 app.get("/petition", (req, res) => {
-    if (!req.session.id) res.redirect("/registration");
+    if (!req.session.id) res.redirect("/login");
     else if (req.session.signature) res.redirect("/thanks");
-    else res.render("petition");
+    else
+        db.getSignature(req.session.id)
+            .then(signature => {
+                req.session.signature = signature;
+                res.redirect("/thanks");
+            })
+            .catch(() => res.render("petition"));
 });
 
 app.post("/petition", (req, res) => {
-    db.getSignature(req.session.id, {
-        success: signature => (req.session.signature = signature),
-        error: db.addSignature(req.body, {
-            success: signature => {
-                req.session.signature = signature;
-                res.redirect("/thanks");
-            },
-            error: () => res.render("petition", { error: true })
+    db.addSignature(req.body)
+        .then(signature => {
+            req.session.signature = signature;
+            res.redirect("/thanks");
         })
-    });
+        .catch(() => res.render("petition", { error: true }));
 });
 
 app.get("/thanks", (req, res) => {
-    console.log(req.session.id);
+    console.log(req.session);
     if (!req.session.id) res.redirect("/registration");
     else if (!req.session.signature) res.redirect("/petition");
-    else res.render("thanks", { session: req.session.signature });
+    else res.render("thanks", { signature: req.session.signature });
 });
 
 app.get("/signers", (req, res) => {
     if (!req.session.id) res.redirect("/registration");
     else if (!req.session.signature) res.redirect("/petition");
     else
-        db.getSigners({
-            success: signers => res.render("signers", { signers }),
-            error: () => res.sendStatus(500)
-        });
+        db.getSigners()
+            .then(signers => res.render("signers", { signers }))
+            .catch(() => res.sendStatus(500));
 });
 
 app.listen(8080, () => {
