@@ -1,4 +1,43 @@
+html,
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #212529;
+    height: 100vh;
+}
+
+main {
+    width: 70%;
+    min-width: 500px;
+    min-height: 500px;
+}
+
+.message {
+    display: flex;
+    align-items: flex-end;
+    color: black;
+    margin: 40px 70px;
+}
+
 #signature-container {
-    width: 300px;
+    margin: 20px 5%;
+    width: 90%;
     height: 100px;
+    background: #fff;
+}
+
+#signature-img {
+    width: 100%;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.flex-center * {
+    margin: 30px;
 }

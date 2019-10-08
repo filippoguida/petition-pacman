@@ -9,9 +9,9 @@ const app = express();
 app.engine("handlebars", handlebars());
 app.set("view engine", "handlebars");
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(__dirname + "/public"));
+app.use(express.static("public"));
 
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
     cookieSession({
         keys: [`coriander-petition-filippoguida-secret`],
@@ -27,15 +27,14 @@ app.use((req, res, next) => {
 });
 
 app.get("/petition", (req, res) => {
-    let id = req.session.signatureId;
-    if (!id) res.render("petition");
+    if (!req.session.id) res.render("petition");
     else res.redirect("/thanks");
 });
 
 app.post("/petition", (req, res) => {
     db.addSignature(req.body, {
         success: id => {
-            req.session.signatureId = id;
+            req.session.id = id;
             res.redirect("/thanks");
         },
         error: () => res.render("petition", { error: true })
@@ -43,17 +42,15 @@ app.post("/petition", (req, res) => {
 });
 
 app.get("/thanks", (req, res) => {
-    let id = req.session.signatureId;
-    if (!id) res.redirect("/petition");
+    if (!req.session.id) res.redirect("/petition");
     else
-        db.getSignature(id, {
+        db.getSignature(req.session.id, {
             success: signature => res.render("thanks", { signature })
         });
 });
 
 app.get("/signers", (req, res) => {
-    let id = req.session.signatureId;
-    if (!id) res.redirect("/petition");
+    if (!req.session.id) res.redirect("/petition");
     else
         db.getSigners({
             success: signers => res.render("signers", { signers }),

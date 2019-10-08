@@ -1,5 +1,13 @@
-<div id="signers-container">
-    {{#each signers}}
-        <p>{{this.first_name}}, {{this.last_name}}</p>
-    {{/each}}
-</div>
+<main class="nes-container is-dark is-rounded">
+    <div class="message-list">
+        {{#each signers}}
+        <div class="message -left">
+            <i class="nes-bcrikko"></i>
+            <div class="nes-balloon from-left black-text">
+              <p>I'm {{this.first_name}}, {{this.last_name}}</p>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    <a href="/thanks">back</a>
+</main>
