@@ -27,32 +27,29 @@ app.use((req, res, next) => {
 });
 
 app.get("/login", (req, res) => {
-    if (!req.session.regId) res.render("login");
+    if (!req.session.id) res.render("login");
+    else res.redirect("/petition");
+});
+
+app.get("/registration", (req, res) => {
+    if (!req.session.id) res.render("registration");
     else res.redirect("/petition");
 });
 
 app.post("/login", (req, res) => {
     db.getUserToken(req.body, {
         success: id => {
-            req.session.regId = id;
+            req.session.id = id;
             res.redirect("/petition");
         },
-        error: err => {
-            console.log(err);
-            res.render("login", { error: true });
-        }
+        error: () => res.render("login", { error: true })
     });
-});
-
-app.get("/registration", (req, res) => {
-    if (!req.session.regId) res.render("registration");
-    else res.redirect("/petition");
 });
 
 app.post("/registration", (req, res) => {
     db.addUser(req.body, {
         success: id => {
-            req.session.regId = id;
+            req.session.id = id;
             res.redirect("/petition");
         },
         error: () => res.render("registration", { error: true })
@@ -60,33 +57,34 @@ app.post("/registration", (req, res) => {
 });
 
 app.get("/petition", (req, res) => {
-    if (!req.session.regId) res.redirect("/registration");
-    else if (!req.session.sigId) res.render("petition");
-    else res.redirect("/thanks");
+    if (!req.session.id) res.redirect("/registration");
+    else if (req.session.signature) res.redirect("/thanks");
+    else res.render("petition");
 });
 
 app.post("/petition", (req, res) => {
-    db.addSignature(req.body, {
-        success: id => {
-            req.session.sigId = id;
-            res.redirect("/thanks");
-        },
-        error: () => res.render("petition", { error: true })
+    db.getSignature(req.session.id, {
+        success: signature => (req.session.signature = signature),
+        error: db.addSignature(req.body, {
+            success: signature => {
+                req.session.signature = signature;
+                res.redirect("/thanks");
+            },
+            error: () => res.render("petition", { error: true })
+        })
     });
 });
 
 app.get("/thanks", (req, res) => {
-    if (!req.session.regId) res.redirect("/registration");
-    else if (!req.session.sigId) res.redirect("/petition");
-    else
-        db.getSignature(req.session.sigId, {
-            success: signature => res.render("thanks", { signature })
-        });
+    console.log(req.session.id);
+    if (!req.session.id) res.redirect("/registration");
+    else if (!req.session.signature) res.redirect("/petition");
+    else res.render("thanks", { session: req.session.signature });
 });
 
 app.get("/signers", (req, res) => {
-    if (!req.session.regId) res.redirect("/registration");
-    else if (!req.session.sigId) res.redirect("/petition");
+    if (!req.session.id) res.redirect("/registration");
+    else if (!req.session.signature) res.redirect("/petition");
     else
         db.getSigners({
             success: signers => res.render("signers", { signers }),
