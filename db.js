@@ -20,7 +20,7 @@ module.exports.addUser = body => {
     });
 };
 
-module.exports.getUserToken = body => {
+module.exports.getUserId = body => {
     return new Promise((resolve, reject) => {
         let { email, password } = body;
         db.query(`SELECT password FROM users WHERE email = $1`, [email])

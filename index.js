@@ -11,13 +11,13 @@ app.set("view engine", "handlebars");
 
 app.use(express.static("public"));
 
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
     cookieSession({
-        keys: [`coriander-petition-filippoguida-secret`],
+        secret: `coriander-petition-filippoguida-secret`,
         maxAge: 1000 * 60 * 60 * 24 * 14 //2 weeks
     })
 );
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(csurf());
 app.use((req, res, next) => {
@@ -37,7 +37,7 @@ app.post("/registration", (req, res) => {
             req.session.id = id;
             res.redirect("/petition");
         })
-        .catch(err => console.log(err)); // res.render("registration", { error: true }));
+        .catch(() => res.render("registration", { error: true }));
 });
 
 app.get("/login", (req, res) => {
@@ -46,7 +46,7 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-    db.getUserToken(req.body)
+    db.getUserId(req.body)
         .then(id => {
             req.session.id = id;
             res.redirect("/petition");
@@ -56,35 +56,34 @@ app.post("/login", (req, res) => {
 
 app.get("/petition", (req, res) => {
     if (!req.session.id) res.redirect("/login");
-    else if (req.session.signature) res.redirect("/thanks");
-    else
-        db.getSignature(req.session.id)
-            .then(signature => {
-                req.session.signature = signature;
-                res.redirect("/thanks");
-            })
-            .catch(() => res.render("petition"));
+    else if (req.session.signed) res.redirect("/thanks");
+    else res.render("petition");
 });
 
 app.post("/petition", (req, res) => {
-    db.addSignature(req.body)
-        .then(signature => {
-            req.session.signature = signature;
+    db.addSignature({ signature: req.body.signature, id: req.session.id })
+        .then(() => {
+            req.session.signed = true;
             res.redirect("/thanks");
         })
         .catch(() => res.render("petition", { error: true }));
 });
 
 app.get("/thanks", (req, res) => {
-    console.log(req.session);
-    if (!req.session.id) res.redirect("/registration");
-    else if (!req.session.signature) res.redirect("/petition");
-    else res.render("thanks", { signature: req.session.signature });
+    if (!req.session.id) res.redirect("/login");
+    else if (!req.session.signed) res.redirect("/petition");
+    else
+        db.getSignature(req.session.id)
+            .then(signature => {
+                req.session.signed = true;
+                res.render("thanks", { signature });
+            })
+            .catch(() => res.render("petition", { error: true }));
 });
 
 app.get("/signers", (req, res) => {
     if (!req.session.id) res.redirect("/registration");
-    else if (!req.session.signature) res.redirect("/petition");
+    else if (!req.session.signed) res.redirect("/petition");
     else
         db.getSigners()
             .then(signers => res.render("signers", { signers }))
