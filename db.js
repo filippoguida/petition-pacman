@@ -45,29 +45,31 @@ module.exports.getUserId = body => {
 };
 
 module.exports.addUserProfile = body => {
-    let { age, city, url } = body;
-    age = Number.isInteger(age) ? age : "";
-    city = city
-        .toLowerCase()
-        .charAt(0)
-        .toUpperCase();
-    function validURL(str) {
-        var pattern = new RegExp(
-            "^(https?:\\/\\/)?" + // protocol
-            "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-            "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
-            "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-            "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-                "(\\#[-a-z\\d_]*)?$",
-            "i"
-        ); // fragment locator
-        return !!pattern.test(str);
-    }
-    url = validURL(url.toLowerCase()) ? url.toLowerCase() : "";
-    db.query(
-        `INSERT INTO users (age, city, url) VALUES ($1, $2, $3) RETURNING id`,
-        [age, city, url]
-    );
+    return new Promise((resolve, reject) => {
+        let { age, city, url } = body;
+        age = Number.isInteger(age) ? age : "";
+        city = city
+            .toLowerCase()
+            .charAt(0)
+            .toUpperCase();
+        function validURL(str) {
+            var pattern = new RegExp(
+                "^(https?:\\/\\/)?" + // protocol
+                "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+                "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+                "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+                "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+                    "(\\#[-a-z\\d_]*)?$",
+                "i"
+            ); // fragment locator
+            return !!pattern.test(str);
+        }
+        url = validURL(url.toLowerCase()) ? url.toLowerCase() : "";
+        db.query(
+            `INSERT INTO user_profiles (age, city, url) VALUES ($1, $2, $3) RETURNING id`,
+            [age, city, url]
+        ).catch(err => reject(err));
+    });
 };
 
 module.exports.addSignature = body => {
@@ -90,20 +92,11 @@ module.exports.getSignature = id => {
     });
 };
 
-module.exports.getSigners = () => {
+module.exports.getSigners = body => {
+    let cityCond = body ? `AND up.city = '${body.city}'` : "";
     return new Promise((resolve, reject) => {
         db.query(
-            `SELECT users.first_name, users.last_name FROM users, signatures WHERE users.id = signatures.id`
-        )
-            .then(sqlTab => resolve(sqlTab.rows))
-            .catch(err => reject(err));
-    });
-};
-
-module.exports.getSignersByCity = () => {
-    return new Promise((resolve, reject) => {
-        db.query(
-            `SELECT users.first_name, users.last_name, user_profiles.city FROM users, signatures WHERE users.id = signatures.id`
+            `SELECT first_name, last_name, age, city FROM users AS u INNER JOIN user_profiles AS up ON u.id = up.id ${cityCond}`
         )
             .then(sqlTab => resolve(sqlTab.rows))
             .catch(err => reject(err));

@@ -26,6 +26,11 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get("/", (req, res) => {
+    if (req.session.id) res.redirect("/petition");
+    else res.redirect("/registration");
+});
+
 app.get("/registration", (req, res) => {
     if (req.session.id) res.redirect("/petition");
     else res.render("registration");
@@ -51,8 +56,9 @@ app.post("/profile", (req, res) => {
         age: req.body.age,
         city: req.body.age,
         url: req.body.url
-    });
-    res.redirect("/petition");
+    })
+        .then(() => res.render("profile", { error: true }))
+        .catch(() => res.redirect("/petition"));
 });
 
 app.get("/login", (req, res) => {
@@ -102,7 +108,7 @@ app.get("/signers", (req, res) => {
     else
         db.getSigners()
             .then(signers => res.render("signers", { signers }))
-            .catch(() => res.sendStatus(500));
+            .catch(err => console.log(err));
 });
 
 app.get("/signers/:city", (req, res) => {
