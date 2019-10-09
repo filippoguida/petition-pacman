@@ -1,11 +1,17 @@
 <main class="nes-container is-dark is-rounded is-centered with-title">
     <p class="title">Save Ghosts from Pacman!</p>
     {{> characters}}
-    <div class="nes-container is-dark is-rounded">
-        Every morning in a vintage game, a Ghost wakes up. It knows it must run faster than Pacman or it will be killed. Since years, this yellow character addicted to digital pills haunts the dreams of poor Ghosts (funny...). Help us so that this can stop.
-    </div>
+    {{> cause}}
     {{#if error}}
         {{> error}}
     {{/if}}
-    {{> signature_form}}
+    <form action="/petition" method="post">
+        <input class="nes-input" type="hidden" name="signature" required>
+        <input class="nes-input" type="hidden" name="_csrf" value={{csrfToken}}>
+        <div id="signature-container" class="nes-pointer"></div>
+        <button class="nes-btn is-primary" type="submit" name="submit">Send</button>
+    </form>
+    <script src="/js/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="/js/p5.min.js" charset="utf-8"></script>
+    <script src="/js/signature.js" charset="utf-8"></script>
 </main>

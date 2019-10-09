@@ -35,9 +35,24 @@ app.post("/registration", (req, res) => {
     db.addUser(req.body)
         .then(id => {
             req.session.id = id;
-            res.redirect("/petition");
+            res.redirect("/profile");
         })
         .catch(() => res.render("registration", { error: true }));
+});
+
+app.get("/profile", (req, res) => {
+    if (!req.session.id) res.redirect("/login");
+    else res.render("profile");
+});
+
+app.post("/profile", (req, res) => {
+    db.addUserProfile({
+        id: req.session.id,
+        age: req.body.age,
+        city: req.body.age,
+        url: req.body.url
+    });
+    res.redirect("/petition");
 });
 
 app.get("/login", (req, res) => {
@@ -90,6 +105,13 @@ app.get("/signers", (req, res) => {
             .catch(() => res.sendStatus(500));
 });
 
-app.listen(8080, () => {
-    console.log("Server is listening on port 8080");
+app.get("/signers/:city", (req, res) => {
+    if (!req.session.id) res.redirect("/registration");
+    else if (!req.session.signed) res.redirect("/petition");
+    else
+        db.getSigners()
+            .then(signers => res.render("signers", { signers }))
+            .catch(() => res.sendStatus(500));
 });
+
+app.listen(process.env.PORT || 8080);

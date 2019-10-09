@@ -1,6 +1,9 @@
 const spicedPg = require("spiced-pg");
 const crypt = require("./crypt");
-const db = spicedPg(`postgres:postgres:postgres@localhost:5432/petition`);
+const db = spicedPg(
+    process.env.DATABASE_URL ||
+        `postgres:postgres:postgres@localhost:5432/petition`
+);
 
 module.exports.addUser = body => {
     return new Promise((resolve, reject) => {
@@ -41,6 +44,32 @@ module.exports.getUserId = body => {
     });
 };
 
+module.exports.addUserProfile = body => {
+    let { age, city, url } = body;
+    age = Number.isInteger(age) ? age : "";
+    city = city
+        .toLowerCase()
+        .charAt(0)
+        .toUpperCase();
+    function validURL(str) {
+        var pattern = new RegExp(
+            "^(https?:\\/\\/)?" + // protocol
+            "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+            "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+            "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+            "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+                "(\\#[-a-z\\d_]*)?$",
+            "i"
+        ); // fragment locator
+        return !!pattern.test(str);
+    }
+    url = validURL(url.toLowerCase()) ? url.toLowerCase() : "";
+    db.query(
+        `INSERT INTO users (age, city, url) VALUES ($1, $2, $3) RETURNING id`,
+        [age, city, url]
+    );
+};
+
 module.exports.addSignature = body => {
     return new Promise((resolve, reject) => {
         let { id, signature } = body;
@@ -65,6 +94,16 @@ module.exports.getSigners = () => {
     return new Promise((resolve, reject) => {
         db.query(
             `SELECT users.first_name, users.last_name FROM users, signatures WHERE users.id = signatures.id`
+        )
+            .then(sqlTab => resolve(sqlTab.rows))
+            .catch(err => reject(err));
+    });
+};
+
+module.exports.getSignersByCity = () => {
+    return new Promise((resolve, reject) => {
+        db.query(
+            `SELECT users.first_name, users.last_name, user_profiles.city FROM users, signatures WHERE users.id = signatures.id`
         )
             .then(sqlTab => resolve(sqlTab.rows))
             .catch(err => reject(err));

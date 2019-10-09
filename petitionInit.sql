@@ -11,6 +11,14 @@ CREATE TABLE users
 DROP TABLE IF EXISTS signatures CASCADE;
 CREATE TABLE signatures
 (
-    id INT references users(id),
+    id INT references users(id) primary key,
     signature TEXT NOT NULL
+);
+
+DROP TABLE IF EXISTS user_profiles CASCADE;
+CREATE TABLE user_profiles(
+    id INT references users(id) primary key,
+    age INT,
+    city VARCHAR,
+    url VARCHAR
 );
