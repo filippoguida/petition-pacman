@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 
 app.get("/", (req, res) => {
     if (req.session.id) res.redirect("/petition");
-    else res.redirect("/registration");
+    else res.redirect("/login");
 });
 
 app.get("/registration", (req, res) => {
@@ -118,6 +118,15 @@ app.get("/signers/:city", (req, res) => {
         db.getSigners()
             .then(signers => res.render("signers", { signers }))
             .catch(() => res.sendStatus(500));
+});
+
+app.get("/unsign", (req, res) => {
+    if (!req.session.id) res.redirect("/registration");
+    else if (!req.session.signed) res.redirect("/petition");
+    else
+        db.deleteSignature(req.session.id)
+            .then(() => res.redirect("/petition"))
+            .catch(err => console.log(err));
 });
 
 app.listen(process.env.PORT || 8080);

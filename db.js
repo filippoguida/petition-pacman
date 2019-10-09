@@ -84,6 +84,14 @@ module.exports.addSignature = body => {
     });
 };
 
+module.exports.deleteSignature = id => {
+    return new Promise((resolve, reject) => {
+        db.query(`DELETE FROM signatures WHERE id = $1`, [id])
+            .then(() => resolve(true))
+            .catch(err => reject(err));
+    });
+};
+
 module.exports.getSignature = id => {
     return new Promise((resolve, reject) => {
         db.query(`SELECT signature FROM signatures WHERE id = $1`, [id])

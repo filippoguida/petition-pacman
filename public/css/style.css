@@ -8,9 +8,16 @@ body {
 }
 
 main {
-    width: 70%;
-    min-width: 500px;
-    min-height: 500px;
+    width: 50%;
+    min-width: 600px;
+}
+
+.margin {
+    margin: 15px;
+}
+
+.small-txt {
+    font-size: 9pt;
 }
 
 .message {
