@@ -103,7 +103,7 @@ app.get("/thanks", (req, res) => {
 });
 
 app.get("/signers", (req, res) => {
-    if (!req.session.id) res.redirect("/registration");
+    if (!req.session.id) res.redirect("/login");
     else if (!req.session.signed) res.redirect("/petition");
     else
         db.getSigners()
@@ -112,7 +112,7 @@ app.get("/signers", (req, res) => {
 });
 
 app.get("/signers/:city", (req, res) => {
-    if (!req.session.id) res.redirect("/registration");
+    if (!req.session.id) res.redirect("/login");
     else if (!req.session.signed) res.redirect("/petition");
     else
         db.getSigners()
@@ -121,12 +121,18 @@ app.get("/signers/:city", (req, res) => {
 });
 
 app.get("/unsign", (req, res) => {
-    if (!req.session.id) res.redirect("/registration");
+    if (!req.session.id) res.redirect("/login");
     else if (!req.session.signed) res.redirect("/petition");
     else
         db.deleteSignature(req.session.id)
             .then(() => res.redirect("/petition"))
             .catch(err => console.log(err));
+});
+
+app.get("/logout", (req, res) => {
+    if (!req.session.id) res.redirect("/login");
+    else req.session = null;
+    res.redirect("/login");
 });
 
 app.listen(process.env.PORT || 8080);
