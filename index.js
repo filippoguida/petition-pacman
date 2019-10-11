@@ -24,6 +24,7 @@ app.post("/login", rq.requireNoLogIn, (req, res) => {
         })
         .catch(() => res.render("login", { error: true }));
 });
+
 app.get("/registration", rq.requireNoLogIn, rq.renderPage);
 app.post("/registration", rq.requireNoLogIn, (req, res) => {
     db.addUser(req.body)
@@ -33,6 +34,7 @@ app.post("/registration", rq.requireNoLogIn, (req, res) => {
         })
         .catch(() => res.render("registration", { error: true }));
 });
+
 app.get("/profile/edit", rq.requireLogIn, (req, res) => {
     db.getUserData(req.session.id)
         .then(data => {
@@ -82,3 +84,4 @@ app.post("/signature/delete", rq.requireLogIn, rq.requireSig, (req, res) => {
 });
 
 app.listen(process.env.PORT || 8080);
+module.exports = app;
