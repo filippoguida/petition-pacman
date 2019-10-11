@@ -1,9 +1,6 @@
 <main class="nes-container is-dark is-rounded is-centered with-title">
     <p class="title">Save Ghosts from Pacman!</p>
     {{> characters}}
-    {{#if error}}
-        {{> error}}
-    {{/if}}
     <form action="/profile" method="post">
         <input class="nes-input" type="text" name="age" placeholder="Age">
         <input class="nes-input" type="text" name="city" placeholder="City">

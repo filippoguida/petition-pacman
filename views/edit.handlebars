@@ -1,0 +1,26 @@
+<main class="nes-container is-dark is-rounded is-centered with-title">
+    <p class="title">Save Ghosts from Pacman!</p>
+    {{> characters}}
+    {{#if error}}
+        {{> error}}
+    {{/if}}
+    <form action="/edit" method="post">
+        <label for="first_name">First Name</label>
+        <input class="nes-input" type="text" name="first_name" value={{first_name}}>
+        <label for="last_name">Last Name</label>
+        <input class="nes-input" type="text" name="last_name" value={{last_name}}>
+        <label for="email">Email</label>
+        <input class="nes-input" type="text" name="email" placeholder={{email}}>
+        <label for="password">Password</label>
+        <input class="nes-input" type="password" name="password">
+        <label for="age">Age</label>
+        <input class="nes-input" type="text" name="age" value={{age}}>
+        <label for="city">City</label>
+        <input class="nes-input" type="text" name="city" value={{city}}>
+        <label for="url">Homepage</label>
+        <input class="nes-input" type="text" name="url" value={{url}}>
+        <input class="nes-input" type="hidden" name="_csrf" value={{csrfToken}}>
+        <button class="nes-btn is-primary" type="submit" name="submit">Update</button>
+    </form>
+    <a href="/logout">log out</a>
+</main>

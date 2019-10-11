@@ -44,14 +44,11 @@ module.exports.getUserId = body => {
     });
 };
 
-module.exports.addUserProfile = body => {
+module.exports.addUserProfile = (id, body) => {
     return new Promise((resolve, reject) => {
         let { age, city, url } = body;
-        age = Number.isInteger(age) ? age : "";
-        city = city
-            .toLowerCase()
-            .charAt(0)
-            .toUpperCase();
+        age = parseInt(age);
+        city = city.toLowerCase();
         function validURL(str) {
             var pattern = new RegExp(
                 "^(https?:\\/\\/)?" + // protocol
@@ -64,10 +61,11 @@ module.exports.addUserProfile = body => {
             ); // fragment locator
             return !!pattern.test(str);
         }
-        url = validURL(url.toLowerCase()) ? url.toLowerCase() : "";
+        url = validURL(url) ? url : "";
+        console.log(age, city, url);
         db.query(
-            `INSERT INTO user_profiles (age, city, url) VALUES ($1, $2, $3) RETURNING id`,
-            [age, city, url]
+            `INSERT INTO user_profiles (id, age, city, url) VALUES ($1, $2, $3, $4)`,
+            [id, age, city, url]
         ).catch(err => reject(err));
     });
 };
@@ -109,4 +107,37 @@ module.exports.getSigners = body => {
             .then(sqlTab => resolve(sqlTab.rows))
             .catch(err => reject(err));
     });
+};
+
+module.exports.getUserData = id => {
+    return new Promise((resolve, reject) => {
+        db.query(
+            `SELECT first_name, last_name, email, password, age, city, url FROM users AS u INNER JOIN user_profiles AS up ON u.id = ${id} AND up.id = ${id}`
+        )
+            .then(sqlTab => resolve(sqlTab.rows[0]))
+            .catch(err => reject(err));
+    });
+};
+
+module.exports.setUserData = (id, body) => {
+    db.query(
+        `UPDATE users SET
+            first_name = COALESCE(${body.first_name}, first_name),
+            last_name = COALESCE(${body.last_name}, last_name),
+            email = COALESCE(${body.email}, email),
+            WHERE id = ${id};
+        UPDATE user_profiles SET
+            age = COALESCE(${body.age}, age),
+            url = COALESCE(${body.url}, url),
+            city = COALESCE(${body.city}, city)
+            WHERE id = ${id}`
+    );
+    if (body.password)
+        crypt.hash(body.password).then(hash =>
+            db.query(
+                `UPDATE users SET
+                    password = COALESCE(${hash}, password)
+                    WHERE id = ${id}`
+            )
+        );
 };

@@ -51,14 +51,8 @@ app.get("/profile", (req, res) => {
 });
 
 app.post("/profile", (req, res) => {
-    db.addUserProfile({
-        id: req.session.id,
-        age: req.body.age,
-        city: req.body.age,
-        url: req.body.url
-    })
-        .then(() => res.render("profile", { error: true }))
-        .catch(() => res.redirect("/petition"));
+    db.addUserProfile(req.session.id, req.body);
+    res.redirect("/petition");
 });
 
 app.get("/login", (req, res) => {
@@ -108,7 +102,7 @@ app.get("/signers", (req, res) => {
     else
         db.getSigners()
             .then(signers => res.render("signers", { signers }))
-            .catch(err => console.log(err));
+            .catch(() => res.sendStatus(500));
 });
 
 app.get("/signers/:city", (req, res) => {
@@ -126,13 +120,28 @@ app.get("/unsign", (req, res) => {
     else
         db.deleteSignature(req.session.id)
             .then(() => res.redirect("/petition"))
-            .catch(err => console.log(err));
+            .catch(() => res.sendStatus(500));
 });
 
 app.get("/logout", (req, res) => {
     if (!req.session.id) res.redirect("/login");
     else req.session = null;
     res.redirect("/login");
+});
+
+app.get("/edit", (req, res) => {
+    if (!req.session.id) res.redirect("/login");
+    else
+        db.getUserData(req.session.id)
+            .then(data => {
+                res.render("edit", data);
+            })
+            .catch(() => res.sendStatus(500));
+});
+
+app.post("/edit", (req, res) => {
+    db.setUserData(req.session.id, req.body);
+    res.redirect("/petition");
 });
 
 app.listen(process.env.PORT || 8080);
