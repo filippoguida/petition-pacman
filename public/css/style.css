@@ -48,3 +48,15 @@ main {
 .flex-center * {
     margin: 30px;
 }
+
+.link-btn {
+    color: #007bff;
+    text-decoration: none;
+    background-color: transparent;
+    border: none;
+}
+
+.link-btn:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

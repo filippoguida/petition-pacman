@@ -1,16 +1,14 @@
-<main class="nes-container is-dark is-rounded">
-    <div class="message-list">
-        {{#each signers}}
-        <div class="message -left">
-            <i class="nes-bcrikko"></i>
-            <div class="nes-balloon from-left black-text">
-              <p>I'm {{this.first_name}}, {{this.last_name}}!</p>
-              <a href="signers/{{this.city}}">{{this.city}}</a>
-            </div>
+<div class="message-list">
+    {{#each signers}}
+    <div class="message -left">
+        <i class="nes-bcrikko"></i>
+        <div class="nes-balloon from-left black-text">
+          <p>I'm {{this.first_name}}, {{this.last_name}}!</p>
+          <a href="signers/{{this.city}}">{{this.city}}</a>
         </div>
-        {{/each}}
     </div>
-    <a href="/thanks">back</a>
-    <a href="/edit">edit profile</a>
-    <a href="/logout">log out</a>
-</main>
+    {{/each}}
+</div>
+<div><a href="/thanks">back</a></div>
+<div><a href="/profile/edit">edit profile</a></div>
+<div><a href="/logout">log out</a></div>

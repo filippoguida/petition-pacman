@@ -120,24 +120,27 @@ module.exports.getUserData = id => {
 };
 
 module.exports.setUserData = (id, body) => {
-    db.query(
-        `UPDATE users SET
-            first_name = COALESCE(${body.first_name}, first_name),
-            last_name = COALESCE(${body.last_name}, last_name),
-            email = COALESCE(${body.email}, email),
-            WHERE id = ${id};
-        UPDATE user_profiles SET
-            age = COALESCE(${body.age}, age),
-            url = COALESCE(${body.url}, url),
-            city = COALESCE(${body.city}, city)
+    return Promise.all([
+        db.query(
+            `UPDATE users SET
+                first_name = COALESCE('${body.first_name}', first_name),
+                last_name = COALESCE('${body.last_name}', last_name),
+                email = COALESCE('${body.email}', email)
             WHERE id = ${id}`
-    );
-    if (body.password)
+        ),
+        db.query(
+            `UPDATE user_profiles SET
+                age = COALESCE('${body.age}', age),
+                url = COALESCE('${body.url}', url),
+                city = COALESCE('${body.city}', city)
+            WHERE id = ${id}`
+        ),
         crypt.hash(body.password).then(hash =>
             db.query(
                 `UPDATE users SET
-                    password = COALESCE(${hash}, password)
-                    WHERE id = ${id}`
+                    password = COALESCE('${hash}', password)
+                WHERE id = ${id}`
             )
-        );
+        )
+    ]);
 };

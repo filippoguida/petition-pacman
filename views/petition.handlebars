@@ -1,20 +1,18 @@
-<main class="nes-container is-dark is-rounded is-centered with-title">
-    <p class="title">Save Ghosts from Pacman!</p>
-    {{> characters}}
-    {{> cause}}
-    {{#if error}}
-        {{> error}}
-    {{/if}}
-    <form action="/petition" method="post">
-        <input class="nes-input" type="hidden" name="signature" required>
-        <input class="nes-input" type="hidden" name="_csrf" value={{csrfToken}}>
-        <div id="signature-container" class="nes-pointer"></div>
-        <button class="nes-btn is-primary" type="submit" name="submit">Send</button>
-    </form>
-    <script src="/js/jquery-3.4.1.min.js" charset="utf-8"></script>
-    <script src="/js/p5.min.js" charset="utf-8"></script>
-    <script src="/js/signature.js" charset="utf-8"></script>
-    <a href="/edit">edit profile</a>
-    <br>
-    <a href="/logout">log out</a>
-</main>
+<p class="title">Save Ghosts from Pacman!</p>
+{{> characters}}
+{{> cause}}
+{{#if error}}
+    {{> error}}
+{{/if}}
+<form action="/petition" method="post">
+    <input class="nes-input" type="hidden" name="signature" required>
+    <input class="nes-input" type="hidden" name="_csrf" value={{csrfToken}}>
+    <div id="signature-container" class="nes-pointer"></div>
+    <button class="nes-btn is-primary" type="submit" name="submit">Send</button>
+</form>
+<script src="/js/jquery-3.4.1.min.js" charset="utf-8"></script>
+<script src="/js/p5.min.js" charset="utf-8"></script>
+<script src="/js/signature.js" charset="utf-8"></script>
+<a href="/profile/edit">edit profile</a>
+<br>
+<div><a href="/logout">log out</a></div>

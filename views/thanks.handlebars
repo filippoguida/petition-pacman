@@ -1,8 +1,9 @@
-<main class="nes-container is-dark is-rounded is-centered with-title flex-center">
-    <h1>Thanks!!</h1>
-    <img id="signature-img" src={{signature}}>
-    <a href="/signers">see all {{count}} signers</a>
-    <a href="/unsign">delete signature</a>
-    <a href="/edit">edit profile</a>
-    <a href="/logout">log out</a>
-</main>
+<h1>Thanks!!</h1>
+<img id="signature-img" src={{signature}}>
+<a href="/signers">see all {{count}} signers</a>
+<form action="/signature/delete" method="POST">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+    <button class="link-btn">delete signature</button>
+</form>
+<div><a href="/profile/edit">edit profile</a></div>
+<div><a href="/logout">log out</a></div>

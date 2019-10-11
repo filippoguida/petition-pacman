@@ -1,15 +1,13 @@
-<main class="nes-container is-dark is-rounded is-centered with-title">
-    <p class="title">Save Ghosts from Pacman!</p>
-    {{> characters}}
-    {{> cause}}
-    {{#if error}}
-        {{> error}}
-    {{/if}}
-    <form action="/login" method="post">
-        <input class="nes-input" type="text" name="email" placeholder="Email Address" required>
-        <input class="nes-input " type="password" name="password" placeholder="Password" required>
-        <input class="nes-input" type="hidden" name="_csrf" value={{csrfToken}}>
-        <button class="nes-btn is-primary margin" type="submit" name="submit">Log In</button>
-    </form>
-    <a class="margin" href="/registration">sign up</a>
-</main>
+<p class="title">Save Ghosts from Pacman!</p>
+{{> characters}}
+{{> cause}}
+{{#if error}}
+    {{> error}}
+{{/if}}
+<form action="/login" method="post">
+    <input class="nes-input" type="text" name="email" placeholder="Email Address" required>
+    <input class="nes-input " type="password" name="password" placeholder="Password" required>
+    <input class="nes-input" type="hidden" name="_csrf" value={{csrfToken}}>
+    <button class="nes-btn is-primary margin" type="submit" name="submit">Log In</button>
+</form>
+<div><a class="margin" href="/registration">sign up</a></div>

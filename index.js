@@ -114,12 +114,15 @@ app.get("/signers/:city", (req, res) => {
             .catch(() => res.sendStatus(500));
 });
 
-app.get("/unsign", (req, res) => {
+app.post("/signature/delete", (req, res) => {
     if (!req.session.id) res.redirect("/login");
     else if (!req.session.signed) res.redirect("/petition");
     else
         db.deleteSignature(req.session.id)
-            .then(() => res.redirect("/petition"))
+            .then(() => {
+                req.session.signed = null;
+                res.redirect("/petition");
+            })
             .catch(() => res.sendStatus(500));
 });
 
@@ -129,17 +132,17 @@ app.get("/logout", (req, res) => {
     res.redirect("/login");
 });
 
-app.get("/edit", (req, res) => {
+app.get("/profile/edit", (req, res) => {
     if (!req.session.id) res.redirect("/login");
     else
         db.getUserData(req.session.id)
             .then(data => {
-                res.render("edit", data);
+                res.render("editprofile", data);
             })
             .catch(() => res.sendStatus(500));
 });
 
-app.post("/edit", (req, res) => {
+app.post("/profile/edit", (req, res) => {
     db.setUserData(req.session.id, req.body);
     res.redirect("/petition");
 });
