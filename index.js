@@ -1,7 +1,7 @@
 const db = require("./modules/db");
-const cookies = require("./routers/cookiesRouter");
-const auth = require("./routers/authRouter");
-const mw = require("./middelware");
+const cookies = require("./middelware/cookies");
+const auth = require("./middelware/auth");
+const rq = require("./middelware/requirements");
 const handlebars = require("express-handlebars");
 const express = require("express");
 
@@ -13,10 +13,10 @@ app.use(express.static("public"));
 app.use(cookies);
 app.use(auth);
 
-app.get("/", mw.toLogin);
-app.get("/login", mw.requireNoLogIn, mw.renderPage);
-app.get("/logout", mw.requireLogIn, mw.logOut, mw.toLogin);
-app.post("/login", mw.requireNoLogIn, (req, res) => {
+app.get("/", rq.toLogin);
+app.get("/login", rq.requireNoLogIn, rq.renderPage);
+app.get("/logout", rq.requireLogIn, rq.logOut, rq.toLogin);
+app.post("/login", rq.requireNoLogIn, (req, res) => {
     db.getUserId(req.body)
         .then(id => {
             req.session.id = id;
@@ -24,34 +24,28 @@ app.post("/login", mw.requireNoLogIn, (req, res) => {
         })
         .catch(() => res.render("login", { error: true }));
 });
-
-app.get("/registration", mw.requireNoLogIn, mw.renderPage);
-app.post("/registration", mw.requireNoLogIn, (req, res) => {
+app.get("/registration", rq.requireNoLogIn, rq.renderPage);
+app.post("/registration", rq.requireNoLogIn, (req, res) => {
     db.addUser(req.body)
         .then(id => {
             req.session.id = id;
-            res.redirect("/profile");
+            res.redirect("/petition");
         })
         .catch(() => res.render("registration", { error: true }));
 });
-app.get("/profile", mw.requireLogIn, mw.renderPage);
-app.post("/profile", (req, res) => {
-    db.addUserProfile(req.session.id, req.body);
-    res.redirect("/petition");
-});
-app.get("/profile/edit", mw.requireLogIn, (req, res) => {
+app.get("/profile/edit", rq.requireLogIn, (req, res) => {
     db.getUserData(req.session.id)
         .then(data => {
             res.render("editprofile", data);
         })
         .catch(() => res.sendStatus(500));
 });
-app.post("/profile/edit", mw.requireLogIn, (req, res) => {
+app.post("/profile/edit", rq.requireLogIn, (req, res) => {
     db.setUserData(req.session.id, req.body);
     res.redirect("/petition");
 });
 
-app.get("/petition", mw.requireLogIn, mw.requireNoSig, mw.renderPage);
+app.get("/petition", rq.requireLogIn, rq.requireNoSig, rq.renderPage);
 app.post("/petition", (req, res) => {
     db.addSignature({ signature: req.body.signature, id: req.session.id })
         .then(() => {
@@ -60,7 +54,7 @@ app.post("/petition", (req, res) => {
         })
         .catch(() => res.render("petition", { error: true }));
 });
-app.get("/thanks", mw.requireLogIn, mw.requireSig, (req, res) => {
+app.get("/thanks", rq.requireLogIn, rq.requireSig, (req, res) => {
     db.getSignature(req.session.id)
         .then(signature => {
             req.session.signed = true;
@@ -70,15 +64,15 @@ app.get("/thanks", mw.requireLogIn, mw.requireSig, (req, res) => {
 });
 app.get(
     ["/signers", "/signers/:city"],
-    mw.requireLogIn,
-    mw.requireSig,
+    rq.requireLogIn,
+    rq.requireSig,
     (req, res) => {
         db.getSigners()
             .then(signers => res.render("signers", { signers }))
             .catch(() => res.sendStatus(500));
     }
 );
-app.post("/signature/delete", mw.requireLogIn, mw.requireSig, (req, res) => {
+app.post("/signature/delete", rq.requireLogIn, rq.requireSig, (req, res) => {
     db.deleteSignature(req.session.id)
         .then(() => {
             req.session.signed = null;
