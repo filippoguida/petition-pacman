@@ -69,7 +69,7 @@ app.get(
     rq.requireLogIn,
     rq.requireSig,
     (req, res) => {
-        db.getSigners()
+        db.getSigners(req.params)
             .then(signers => res.render("signers", { signers }))
             .catch(() => res.sendStatus(500));
     }

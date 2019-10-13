@@ -76,15 +76,25 @@ module.exports.getSignature = id => {
 module.exports.getSigners = body => {
     return new Promise((resolve, reject) => {
         let { city } = sanitizeUserData(body);
-        db.query(
-            `SELECT first_name, last_name, age, city
-            FROM users AS u
-            INNER JOIN user_profiles AS up
-            ON u.id = up.id AND up.city = $2`,
-            [city]
-        )
-            .then(sqlTab => resolve(sqlTab.rows))
-            .catch(err => reject(err));
+        if (city)
+            db.query(
+                `SELECT first_name, last_name, age, city
+                FROM users AS u
+                INNER JOIN user_profiles AS up
+                ON u.id = up.id AND up.city = $1`,
+                [city]
+            )
+                .then(sqlTab => resolve(sqlTab.rows))
+                .catch(err => reject(err));
+        else
+            db.query(
+                `SELECT first_name, last_name, age, city
+                FROM users AS u
+                INNER JOIN user_profiles AS up
+                ON u.id = up.id AND up.city IS NOT NULL`
+            )
+                .then(sqlTab => resolve(sqlTab.rows))
+                .catch(err => reject(err));
     });
 };
 
@@ -146,7 +156,10 @@ module.exports.setUserData = (id, body) => {
 };
 
 function sanitizeUserData(body) {
-    body.age = parseInt(body.age) || "";
+    body = body || {};
+    body.age = body.age || "";
+    body.age = parseInt(body.age);
+    body.city = body.city || "";
     body.city = body.city.charAt(0).toUpperCase() + body.city.slice(1) || "";
     function validURL(str) {
         var pattern = new RegExp(
@@ -160,6 +173,7 @@ function sanitizeUserData(body) {
         ); // fragment locator
         return !!pattern.test(str);
     }
+    body.url = body.url || "";
     body.url = validURL(body.url) ? body.url : "";
     return body;
 }
